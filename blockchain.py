@@ -3,7 +3,11 @@
 # ・トランザクション追加
 # ・ブロック生成
 
+import os
+import requests
+import json
 import datetime
+import config
 
 KEY_TRANSACTIONS = "transactions"
 KEY_BLOCKS = "blocks"
@@ -17,6 +21,18 @@ class BlockChain(object):
     self.transaction_pool = {KEY_TRANSACTIONS: []}
     # ブロック
     self.chain = {KEY_BLOCKS: []}
+
+  # 連携URL
+  def get_target_url(self):
+    urls = os.getenv("URL_TO_LINK")
+    if urls:
+      return urls
+    result = []
+    current = os.getenv("CURRENT_URL")
+    for target in config.URL_TO_LINK:
+      if target.lower() != current.lower():
+        result.append(target)
+    return result
 
   # トランザクションプールにトランザクションを追加する
   def add_transaction_pool(self, transaction):
@@ -46,5 +62,24 @@ class BlockChain(object):
     }
     self.chain[KEY_BLOCKS].append(block)
     # トランザクションプール初期化
+    self.transaction_pool[KEY_TRANSACTIONS] = []
+
+  # トランザクション連携
+  def broadcast_transaction(self, transaction):
+    transaction_dict = transaction.dict()
+    for url in self.get_target_url():
+      res = requests.post(url + "/recieve_transaction", json.dumps(transaction_dict))
+      print(res.json())
+
+  # ブロックチェーン連携
+  def broadcast_chain(self, chain):
+    for url in self.get_target_url():
+      res = requests.post(url + "/recieve_chain", json.dumps(chain))
+      print(res.json())
+
+  # ブロックチェーン交換
+  def replace_chain(self, chain):
+    chain_dict = chain.dict()
+    self.chain = chain_dict
     self.transaction_pool[KEY_TRANSACTIONS] = []
 
