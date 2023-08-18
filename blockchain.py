@@ -26,7 +26,7 @@ class BlockChain(object):
   def get_target_url(self):
     urls = os.getenv("URL_TO_LINK")
     if urls:
-      return urls
+      return urls.split(",")
     result = []
     current = os.getenv("CURRENT_URL")
     for target in config.URL_TO_LINK:
