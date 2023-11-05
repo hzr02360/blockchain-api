@@ -8,6 +8,7 @@ import requests
 import json
 import datetime
 import config
+from credential import convert_key_object, create_signeture
 
 KEY_TRANSACTIONS = "transactions"
 KEY_BLOCKS = "blocks"
@@ -23,6 +24,7 @@ class BlockChain(object):
     self.chain = {KEY_BLOCKS: []}
 
   # 連携URL
+  # ToDo 本番環境向けにリファクタ予定
   def get_target_url(self):
     urls = os.getenv("URL_TO_LINK")
     if urls:
@@ -82,4 +84,19 @@ class BlockChain(object):
     chain_dict = chain.dict()
     self.chain = chain_dict
     self.transaction_pool[KEY_TRANSACTIONS] = []
+
+  # トランザクションデータ検証
+  def verify_transaction(self, transaction):
+    pub_key = convert_key_object(transaction.sender)
+    signature_str = create_signeture(transaction.signature)
+    unsigned_tran = {
+      "time": transaction.time,
+      "sender": transaction.sender,
+      "reciever": transaction.reciever,
+      "amount": transaction.amount,
+      "description": transaction.description
+    }
+    json_unsigned_tran = json.dumps(unsigned_tran)
+    bytes_unsigned_tran = bytes(json_unsigned_tran, encoding="utf-8")
+    return pub_key.verify(signature_str, bytes_unsigned_tran)
 
