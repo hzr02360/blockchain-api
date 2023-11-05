@@ -15,15 +15,17 @@ def get_transaction_pool():
 # トランザクション登録・同報機能
 @app.post("/put_transaction")
 def put_transaction(transaction: Transaction):
-  blockchain.add_transaction_pool(transaction)
-  blockchain.broadcast_transaction(transaction)
-  return {"message": "Transaction registered."}
+  if blockchain.verify_transaction(transaction):
+    blockchain.add_transaction_pool(transaction)
+    blockchain.broadcast_transaction(transaction)
+    return {"message": "Transaction registered."}
 
 # トランザクション更新機能
 @app.post("/recieve_transaction")
 def recieve_transaction(transaction: Transaction):
-  blockchain.add_transaction_pool(transaction)
-  return {"message": "Transaction broadcasting completed."}
+  if blockchain.verify_transaction(transaction):
+    blockchain.add_transaction_pool(transaction)
+    return {"message": "Transaction broadcasting completed."}
 
 # ブロックチェーン参照機能
 @app.get("/get_chain")
