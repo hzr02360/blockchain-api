@@ -20,7 +20,7 @@ def put_transaction(transaction: Transaction):
     blockchain.broadcast_transaction(transaction)
     return {"message": "Transaction registered."}
 
-# トランザクション更新機能
+# トランザクション同報更新機能
 @app.post("/recieve_transaction")
 def recieve_transaction(transaction: Transaction):
   if blockchain.verify_transaction(transaction):
@@ -39,7 +39,7 @@ def create_block(creator: str):
   blockchain.broadcast_chain(blockchain.chain)
   return {"message": "New block generated."}
 
-# ブロックチェーン更新機能
+# ブロックチェーン同報更新機能
 @app.post("/recieve_chain")
 def recieve_chain(chain: Chain):
   blockchain.replace_chain(chain)

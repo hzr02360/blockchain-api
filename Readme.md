@@ -22,3 +22,14 @@ INFO:     Application startup complete.
 - 停止する場合は、Ctrl ＋ C を押下する
 
 ## 本番環境（インターネット環境）
+
+# URL
+
+| パス                    | 種類 | 内容                               |
+| ----------------------- | ---- | ---------------------------------- |
+| /get_transaction_pool   | GET  | トランザクションプール参照         |
+| /put_transaction        | POST | トランザクションデータ登録／同報   |
+| /recieve_transaction    | POST | トランザクションデータ同報更新     |
+| /get_chain              | GET  | ブロックチェーン参照               |
+| /create_block/{creator} | POST | ブロック生成・ブロックチェーン同報 |
+| /recieve_chain          | POST | ブロックチェーン同報更新           |
