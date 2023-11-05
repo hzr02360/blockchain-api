@@ -14,7 +14,10 @@ from credential import convert_key_object, create_signeture
 
 KEY_TRANSACTIONS = "transactions"
 KEY_BLOCKS = "blocks"
+KEY_HASH = "hash"
+KEY_NONCE = "nonce"
 REWORD_AMOUNT = 999
+POW_DIGIT = 4
 
 class BlockChain(object):
 
@@ -63,21 +66,32 @@ class BlockChain(object):
       "signature": "not required"
     }
     # リワードトランザクションを登録する
-    transactions = self.transaction_pool[KEY_TRANSACTIONS]
+    transactions = self.transaction_pool[KEY_TRANSACTIONS].copy()
     transactions.append(reword_transactuin_dict)
     # 最後のブロックのハッシュを生成する
     last_block = self.chain[KEY_BLOCKS][-1]
     hash = self.hash(last_block)
-    # ブロックを生成しチェーンへ追加する
-    block = {
-      "time": datetime.datetime.now().isoformat(),
+    # Proof of workのためのハッシュ値計算
+    pow_block = {
       "transactions": transactions,
       "hash": hash,
       "nonce": 0      
     }
+    while not self.hash(pow_block)[:POW_DIGIT] == '0'*POW_DIGIT:
+      pow_block[KEY_NONCE] += 1
+    # ブロックを生成しチェーンへ追加する
+    block = {
+      "time": datetime.datetime.now().isoformat(),
+      "transactions": pow_block[KEY_TRANSACTIONS],
+      "hash": pow_block[KEY_HASH],
+      "nonce": pow_block[KEY_NONCE]     
+    }
     self.chain[KEY_BLOCKS].append(block)
     # トランザクションプール初期化
-    self.transaction_pool[KEY_TRANSACTIONS] = []
+    # 新しいブロックが含んでいるトランザクションデータをトランザクションプールから削除する
+    for transaction in block[KEY_TRANSACTIONS]:
+      if transaction in self.transaction_pool[KEY_TRANSACTIONS]:
+        self.transaction_pool[KEY_TRANSACTIONS].remove(transaction)
 
   # トランザクション連携
   def broadcast_transaction(self, transaction):
@@ -96,7 +110,12 @@ class BlockChain(object):
   def replace_chain(self, chain):
     chain_dict = chain.dict()
     self.chain = chain_dict
-    self.transaction_pool[KEY_TRANSACTIONS] = []
+    # トランザクションプール初期化
+    # 受け取ったブロックチェーンの最終ブロックが含んでいるトランザクションデータをトランザクションプールから削除する
+    last_block_transaction = self.chain[KEY_BLOCKS][-1][KEY_TRANSACTIONS]
+    for transaction in last_block_transaction:
+      if transaction in self.transaction_pool[KEY_TRANSACTIONS]:
+        self.transaction_pool[KEY_TRANSACTIONS].remove(transaction)
 
   # トランザクションデータ検証
   def verify_transaction(self, transaction):
