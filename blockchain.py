@@ -8,6 +8,8 @@ import requests
 import json
 import datetime
 import config
+import hashlib
+
 from credential import convert_key_object, create_signeture
 
 KEY_TRANSACTIONS = "transactions"
@@ -22,6 +24,14 @@ class BlockChain(object):
     self.transaction_pool = {KEY_TRANSACTIONS: []}
     # ブロック
     self.chain = {KEY_BLOCKS: []}
+    # 1件目のブロックを生成する
+    self.first_block = {
+      "time": "0000-00-00T00:00:00.000000",
+      "transactions": [],
+      "hash": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "nonce": 0
+    }
+    self.chain[KEY_BLOCKS].append(self.first_block)
 
   # 連携URL
   # ToDo 本番環境向けにリファクタ予定
@@ -55,11 +65,14 @@ class BlockChain(object):
     # リワードトランザクションを登録する
     transactions = self.transaction_pool[KEY_TRANSACTIONS]
     transactions.append(reword_transactuin_dict)
+    # 最後のブロックのハッシュを生成する
+    last_block = self.chain[KEY_BLOCKS][-1]
+    hash = self.hash(last_block)
     # ブロックを生成しチェーンへ追加する
     block = {
       "time": datetime.datetime.now().isoformat(),
       "transactions": transactions,
-      "hash": "Temporary hash value",
+      "hash": hash,
       "nonce": 0      
     }
     self.chain[KEY_BLOCKS].append(block)
@@ -100,3 +113,8 @@ class BlockChain(object):
     bytes_unsigned_tran = bytes(json_unsigned_tran, encoding="utf-8")
     return pub_key.verify(signature_str, bytes_unsigned_tran)
 
+  # ハッシュ生成
+  def hash(self, block):
+    json_block = json.dumps(block)
+    byte_block = bytes(json_block, encoding="utf-8")
+    return hashlib.sha256(byte_block).hexdigest()
