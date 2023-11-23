@@ -19,9 +19,19 @@ INFO:     Application startup complete.
 
 ```
 
+```bash
+$ CURRENT_URL="http://127.0.0.1:8002" uvicorn main:app --reload --port 8002
+```
+
+```bash
+$ CURRENT_URL="http://127.0.0.1:8003" uvicorn main:app --reload --port 8003
+```
+
 - 停止する場合は、Ctrl ＋ C を押下する
 
 ## 本番環境（インターネット環境）
+
+<未稿>
 
 # URL
 
