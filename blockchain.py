@@ -16,6 +16,9 @@ KEY_TRANSACTIONS = "transactions"
 KEY_BLOCKS = "blocks"
 KEY_HASH = "hash"
 KEY_NONCE = "nonce"
+KEY_TIME = "time"
+KEY_SENDER = "sender"
+KEY_AMOUNT = "amount"
 REWORD_AMOUNT = 999
 POW_DIGIT = 4
 
@@ -131,6 +134,45 @@ class BlockChain(object):
     json_unsigned_tran = json.dumps(unsigned_tran)
     bytes_unsigned_tran = bytes(json_unsigned_tran, encoding="utf-8")
     return pub_key.verify(signature_str, bytes_unsigned_tran)
+
+  # ブロックチェーン検証
+  def verify_chain(self, chain):
+    chain_dict = chain.dict()
+    # ブロック数を検証する
+    if len(chain_dict[KEY_BLOCKS]) <= len(self.chain[KEY_BLOCKS]):
+      return False
+
+    # 全ブロックを検証する
+    for i in range(len(chain_dict[KEY_BLOCKS])):
+      block = chain_dict[KEY_BLOCKS][i]
+      prev_block = chain_dict[KEY_BLOCKS][i - 1]
+      if i == 0:
+        # 先頭ブロックが初期値と一致することを確認する
+        if block != self.first_block:
+          return False
+      else:
+        # ブロックのHash値が1つ前のブロックのHash値と一致することを確認する
+        if (block[KEY_HASH] != self.hash(prev_block)):
+          return False
+        # Proof of Workを確認する
+        # transactions, hash, nonceの結合情報のHash値の先頭4桁が0000であること
+        block_without_time = {
+          KEY_TRANSACTIONS: block[KEY_TRANSACTIONS],
+          KEY_HASH: block[KEY_HASH],
+          KEY_NONCE: block[KEY_NONCE]
+        }
+        if self.hash(block_without_time)[:POW_DIGIT] != '0'*POW_DIGIT:
+          return False
+
+    # リワードトランザクションを検証する
+    # sender, amountが一致していること
+    reword_transaction = chain_dict[KEY_BLOCKS][-1][KEY_TRANSACTIONS][-1]
+    if reword_transaction[KEY_SENDER] != "Blockchain":
+      return False
+    if reword_transaction[KEY_AMOUNT] != REWORD_AMOUNT:
+      return False
+
+    return True
 
   # ハッシュ生成
   def hash(self, block):

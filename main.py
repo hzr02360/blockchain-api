@@ -42,8 +42,12 @@ def create_block(creator: str):
 # ブロックチェーン同報更新機能
 @app.post("/recieve_chain")
 def recieve_chain(chain: Chain):
-  blockchain.replace_chain(chain)
-  return {"message": "BlockChain broadcasting completed."}
+  # 受信したブロックチェーンを検証する
+  if blockchain.verify_chain(chain):
+    blockchain.replace_chain(chain)
+    return {"message": "BlockChain broadcasting completed."}
+  else:
+    return {"message": "BlockChain broadcasting uncompleted."}
 
 # URL参照機能
 @app.get("/url")

@@ -2,6 +2,12 @@
 
 - ブロックチェーン API サーバを実装する
 
+# install
+- pip install --user fastapi
+- pip install --user uvicorn
+- pip install --user ecdsa
+- pip install --user requests
+
 # Usage
 
 ## ローカル環境
