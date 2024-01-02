@@ -6,12 +6,14 @@
 
 - python3 と以下のフレームワーク・ライブラリ
 
-| ライブラリ名                                   | 用途                                |
-| ---------------------------------------------- | ----------------------------------- |
-| [FastAPI](https://fastapi.tiangolo.com/ja/)    | API 実装用の Web フレームワーク     |
-| [Uvicorn](https://www.uvicorn.org/)            | Python 用の ASGI ウェブサーバー実装 |
-| [ecdsa](https://pypi.org/project/ecdsa/)       | 暗号アルゴリズムライブラリ          |
-| [requests](https://pypi.org/project/requests/) | Python で使われる HTTP ライブラリ   |
+| ライブラリ名                                             | 用途                                |
+| -------------------------------------------------------- | ----------------------------------- |
+| [FastAPI](https://fastapi.tiangolo.com/ja/)              | API 実装用の Web フレームワーク     |
+| [Uvicorn](https://www.uvicorn.org/)                      | Python 用の ASGI ウェブサーバー実装 |
+| [ecdsa](https://pypi.org/project/ecdsa/)                 | 暗号アルゴリズムライブラリ          |
+| [requests](https://pypi.org/project/requests/)           | Python で使われる HTTP ライブラリ   |
+| [python-dotenv](https://pypi.org/project/python-dotenv/) | 環境変数を扱うためのライブラリ      |
+| [pyyaml](https://pypi.org/project/PyYAML/)               | yaml ファイルを扱うためのライブラリ |
 
 - Ubuntu 22.04.3 LTS
 - [Render](https://render.com/)
