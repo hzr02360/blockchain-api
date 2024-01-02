@@ -1,6 +1,8 @@
 # ブロックチェーン API サーバ
 
 - python3 でブロックチェーン API サーバを実装する
+- こちらから派生しています  
+  https://github.com/moyattodataman/blockchain/tree/main
 
 ## 環境
 
