@@ -25,11 +25,7 @@
 - `.env`ファイルにローカル環境のサーバ URL を定義する
 
 ```bash
-URL_TO_LINK="
-http://127.0.0.1:8001,
-http://127.0.0.1:8002,
-http://127.0.0.1:8003
-"
+URL_TO_LINK="http://127.0.0.1:8001,http://127.0.0.1:8002,http://127.0.0.1:8003"
 ```
 
 - 以下のコマンドをポート番号を変えて実行する
@@ -67,7 +63,11 @@ $ uvicorn blockchain.controller:app --reload --port 8003
   - Branch: GitHub リポジトリのブランチ名
   - Build Command: pip install -r requirements.txt
   - Start Command: uvicorn blockchain.controller:app --host 0.0.0.0 --port 10000
-- デプロイしたサーバの環境変数`.env`に通信先のサーバ URL を設定する
+- デプロイしたサーバの環境変数に通信先のサーバ URL を設定する（自サーバURL以外を設定しておく）
+
+```bash
+URL_TO_LINK=https://blockchain-api-02.onrender.com,https://blockchain-api-03.onrender.com
+```
 
 ### アクセス可能な URL
 
