@@ -1,55 +1,63 @@
-# ブロックチェーンAPIサーバの主処理
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI
-from model import Transaction, Chain
-import blockchain
+from blockchain.common import const, getAppLogger
+from blockchain.model import Transaction, Chain
+from blockchain.blockchain import BlockChain
 
+logger = getAppLogger(__name__)
+load_dotenv()
 app = FastAPI()
 
-blockchain = blockchain.BlockChain()
+blockchain = BlockChain()
 
 # トランザクションプール参照機能
-@app.get("/get_transaction_pool")
+@app.get(const.URL_GET_TRANSACTION_POOL)
 def get_transaction_pool():
   return blockchain.transaction_pool
 
 # トランザクション登録・同報機能
-@app.post("/put_transaction")
+@app.post(const.URL_REG_PUT_TRANSACTION)
 def put_transaction(transaction: Transaction):
   if blockchain.verify_transaction(transaction):
     blockchain.add_transaction_pool(transaction)
     blockchain.broadcast_transaction(transaction)
-    return {"message": "Transaction registered."}
+    return editResponse("Transaction registered.")
 
 # トランザクション同報更新機能
-@app.post("/recieve_transaction")
+@app.post(const.URL_UPDATE_TRANSACTION)
 def recieve_transaction(transaction: Transaction):
   if blockchain.verify_transaction(transaction):
     blockchain.add_transaction_pool(transaction)
-    return {"message": "Transaction broadcasting completed."}
+    return editResponse("Transaction broadcasting completed.")
 
 # ブロックチェーン参照機能
-@app.get("/get_chain")
+@app.get(const.URL_GET_CHAIN)
 def get_chain():
   return blockchain.chain
 
 # ブロック生成・ブロックチェーン同報機能
-@app.get("/create_block/{creator}")
+@app.get(const.URL_CREATE_BLOCK)
 def create_block(creator: str):
   blockchain.create_block(creator)
   blockchain.broadcast_chain(blockchain.chain)
-  return {"message": "New block generated."}
+  return editResponse("New block generated.")
 
 # ブロックチェーン同報更新機能
-@app.post("/recieve_chain")
+@app.post(const.URL_UPDATE_CHAIN)
 def recieve_chain(chain: Chain):
   # 受信したブロックチェーンを検証する
   if blockchain.verify_chain(chain):
     blockchain.replace_chain(chain)
-    return {"message": "BlockChain broadcasting completed."}
+    return editResponse("BlockChain broadcasting completed.")
   else:
-    return {"message": "BlockChain broadcasting uncompleted."}
+    return editResponse("BlockChain broadcasting uncompleted.")
 
 # URL参照機能
-@app.get("/url")
+@app.get(const.URL_GET_URL)
 def view_url():
-  return {"message": blockchain.get_target_url()}
+  return editResponse(blockchain.get_target_url())
+
+def editResponse(message):
+  logger.info(message)
+  return {"message": message}

@@ -1,16 +1,10 @@
-# ブロックチェーンクラス
-# ・トランザクション、ブロックを保持する
-# ・トランザクション追加
-# ・ブロック生成
-
 import os
+import inspect
 import requests
 import json
 import datetime
-import config
 import hashlib
-
-from credential import convert_key_object, create_signeture
+from blockchain.common import const, getAppLogger, convert_key_object, create_signeture
 
 KEY_TRANSACTIONS = "transactions"
 KEY_BLOCKS = "blocks"
@@ -18,9 +12,14 @@ KEY_HASH = "hash"
 KEY_NONCE = "nonce"
 KEY_TIME = "time"
 KEY_SENDER = "sender"
+KEY_RECIEVER = "reciever"
 KEY_AMOUNT = "amount"
+KEY_DESCRIPTION = "description"
+KEY_SIGNATURE = "signature"
 REWORD_AMOUNT = 999
 POW_DIGIT = 4
+
+logger = getAppLogger(__name__)
 
 class BlockChain(object):
 
@@ -32,25 +31,17 @@ class BlockChain(object):
     self.chain = {KEY_BLOCKS: []}
     # 1件目のブロックを生成する
     self.first_block = {
-      "time": "0000-00-00T00:00:00.000000",
-      "transactions": [],
-      "hash": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-      "nonce": 0
+      KEY_TIME: "0000-00-00T00:00:00.000000",
+      KEY_TRANSACTIONS: [],
+      KEY_HASH: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      KEY_NONCE: 0
     }
     self.chain[KEY_BLOCKS].append(self.first_block)
 
   # 連携URL
-  # ToDo 本番環境向けにリファクタ予定
   def get_target_url(self):
     urls = os.getenv("URL_TO_LINK")
-    if urls:
-      return urls.split(",")
-    result = []
-    current = os.getenv("CURRENT_URL")
-    for target in config.URL_TO_LINK:
-      if target.lower() != current.lower():
-        result.append(target)
-    return result
+    return urls.split(",")
 
   # トランザクションプールにトランザクションを追加する
   def add_transaction_pool(self, transaction):
@@ -61,12 +52,12 @@ class BlockChain(object):
   def create_block(self, creator):
     # リワードトランザクション
     reword_transactuin_dict = {
-      "time": datetime.datetime.now().isoformat(),
-      "sender": "BlockChain",
-      "reciever": creator,
-      "amount": REWORD_AMOUNT,
-      "description": "reword",
-      "signature": "not required"
+      KEY_TIME: datetime.datetime.now().isoformat(),
+      KEY_SENDER: "BlockChain",
+      KEY_RECIEVER: creator,
+      KEY_AMOUNT: REWORD_AMOUNT,
+      KEY_DESCRIPTION: "reword",
+      KEY_SIGNATURE: "not required"
     }
     # リワードトランザクションを登録する
     transactions = self.transaction_pool[KEY_TRANSACTIONS].copy()
@@ -76,18 +67,18 @@ class BlockChain(object):
     hash = self.hash(last_block)
     # Proof of workのためのハッシュ値計算
     pow_block = {
-      "transactions": transactions,
-      "hash": hash,
-      "nonce": 0      
+      KEY_TRANSACTIONS: transactions,
+      KEY_HASH: hash,
+      KEY_NONCE: 0      
     }
     while not self.hash(pow_block)[:POW_DIGIT] == '0'*POW_DIGIT:
       pow_block[KEY_NONCE] += 1
     # ブロックを生成しチェーンへ追加する
     block = {
-      "time": datetime.datetime.now().isoformat(),
-      "transactions": pow_block[KEY_TRANSACTIONS],
-      "hash": pow_block[KEY_HASH],
-      "nonce": pow_block[KEY_NONCE]     
+      KEY_TIME: datetime.datetime.now().isoformat(),
+      KEY_TRANSACTIONS: pow_block[KEY_TRANSACTIONS],
+      KEY_HASH: pow_block[KEY_HASH],
+      KEY_NONCE: pow_block[KEY_NONCE]     
     }
     self.chain[KEY_BLOCKS].append(block)
     # トランザクションプール初期化
@@ -100,14 +91,14 @@ class BlockChain(object):
   def broadcast_transaction(self, transaction):
     transaction_dict = transaction.dict()
     for url in self.get_target_url():
-      res = requests.post(url + "/recieve_transaction", json.dumps(transaction_dict))
-      print(res.json())
+      res = requests.post(url + const.URL_UPDATE_TRANSACTION, json.dumps(transaction_dict))
+      logger.info('%s:%s,%s', inspect.currentframe().f_code.co_name, url.replace('\n', ''), res.json())
 
   # ブロックチェーン連携
   def broadcast_chain(self, chain):
     for url in self.get_target_url():
-      res = requests.post(url + "/recieve_chain", json.dumps(chain))
-      print(res.json())
+      res = requests.post(url + const.URL_UPDATE_CHAIN, json.dumps(chain))
+      logger.info('%s:%s,%s', inspect.currentframe().f_code.co_name, url.replace('\n', ''), res.json())
 
   # ブロックチェーン交換
   def replace_chain(self, chain):
@@ -125,11 +116,11 @@ class BlockChain(object):
     pub_key = convert_key_object(transaction.sender)
     signature_str = create_signeture(transaction.signature)
     unsigned_tran = {
-      "time": transaction.time,
-      "sender": transaction.sender,
-      "reciever": transaction.reciever,
-      "amount": transaction.amount,
-      "description": transaction.description
+      KEY_TIME: transaction.time,
+      KEY_SENDER: transaction.sender,
+      KEY_RECIEVER: transaction.reciever,
+      KEY_AMOUNT: transaction.amount,
+      KEY_DESCRIPTION: transaction.description
     }
     json_unsigned_tran = json.dumps(unsigned_tran)
     bytes_unsigned_tran = bytes(json_unsigned_tran, encoding="utf-8")
