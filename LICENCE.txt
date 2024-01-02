@@ -20,8 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-The major design pattern of this software was derived from Moyatto Dataman's create_key and post_transaction, which is subject to the same license.
-Here is the original copyright notice for create_key and post_transaction:
+The major design pattern of this software was derived from Moyatto Dataman's blockchain_api, which is subject to the same license.
+Here is the original copyright notice for blockchain_api:
 
 
 Copyright (c) 2022 Moyatto Dataman
