@@ -188,7 +188,7 @@ URL_TO_LINK=https://blockchain-api-02.onrender.com,https://blockchain-api-03.onr
 > リワードトランザクションは、ブロック報酬(block reword)を割り当てるためのトランザクションを指す。
 > 参考：[ブロック報酬とは？【GW に考える暗号資産の基本】](https://www.coindeskjapan.com/141478/)
 
-##　セキュリティ
+## セキュリティ
 
 トランザクションデータの検証
 
